@@ -2,6 +2,26 @@ def in2mm(val_in):
     return val_in * 25.4
 
 
+# Konfiguration für die Fräsereinstellungen
+SAFE_HEIGHT = 5.0  # Sicherheitsabstand in mm
+CUT_DEPTH = -1.0   # Frästiefe in mm
+FEED_RATE = 300    # Vorschubgeschwindigkeit in mm/min
+
+AUTO_ROTATE = False
+MANUAL_ROTATION_DEG = 0 # only used if AUTO_ROTATE == False
+
+AUTO_SCALE = False
+CANVAS_WIDTH_X = in2mm(11)
+CANVAS_WIDTH_Y = in2mm(8.5)
+
+AUTO_SHIFT = False
+
+CANVAS_LEFT_MARGIN = 0 
+CANVAS_RIGHT_MARGIN = 0 
+CANVAS_TOP_MARGIN = 0 
+CANVAS_BOTTOM_MARGIN = 0 
+
+
 def gcode_pause(timeout_s):
     yield f'G4 P{timeout_s:.2f}'
 
@@ -18,25 +38,12 @@ def postamble():
 
 
 def pen_up():
-    yield 'M5'
-    yield from gcode_pause(0.15)
+    yield f'G0 Z{SAFE_HEIGHT}'  # Spindel anheben
 
 
 def pen_down():
-    yield 'M3 S30'
-    yield from gcode_pause(0.15)
+    yield f'G1 Z{CUT_DEPTH} F{FEED_RATE}'  # Spindel absenken mit Vorschub
 
-
-AUTO_ROTATE = True
-MANUAL_ROTATION_DEG = 0 # only used if AUTO_ROTATE == False
-
-CANVAS_WIDTH_X = in2mm(11)
-CANVAS_WIDTH_Y = in2mm(8.5)
-
-CANVAS_LEFT_MARGIN = in2mm(1)
-CANVAS_RIGHT_MARGIN = in2mm(1)
-CANVAS_TOP_MARGIN = in2mm(1)
-CANVAS_BOTTOM_MARGIN = in2mm(1)
 
 USABLE_WIDTH = CANVAS_WIDTH_X - CANVAS_LEFT_MARGIN - CANVAS_RIGHT_MARGIN
 USABLE_HEIGHT = CANVAS_WIDTH_Y - CANVAS_TOP_MARGIN - CANVAS_BOTTOM_MARGIN

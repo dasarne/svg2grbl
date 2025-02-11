@@ -12,7 +12,6 @@ import numpy
 
 from config import *
 
-
 def extract_points(path):
     def transform(x, y):
         return numpy.array(x), -numpy.array(y)
@@ -54,6 +53,7 @@ def extract_points(path):
     yield transform(x, y)
 
 
+
 def get_bounds(paths):
     bounding_boxes = [path.bbox() for path in paths]
 
@@ -92,26 +92,34 @@ def generate_paths(fname):
 
     doc = svgpathtools.document.Document(fname)
     paths = doc.paths()
-    bounds = get_bounds(paths)
 
     document_rotation_deg = MANUAL_ROTATION_DEG
+
     if AUTO_ROTATE:
+        bounds = get_bounds(paths)
         document_rotation_deg = 0 if is_canvas_landscape == bounds.is_landscape else 90
+        paths = rotate_paths(paths, document_rotation_deg, bounds)
 
-    paths = rotate_paths(paths, document_rotation_deg, bounds)
+    if AUTO_SCALE:
+        bounds = get_bounds(paths)
+        # auto scale to usable bounds
+        scale_x = USABLE_WIDTH / bounds.width
+        scale_y = USABLE_HEIGHT / bounds.height
+        min_scale = min(scale_x, scale_y)
+        paths = scale_paths(paths, min_scale, bounds)
+    
     bounds = get_bounds(paths)
 
-    # auto scale to usable bounds
-    scale_x = USABLE_WIDTH / bounds.width
-    scale_y = USABLE_HEIGHT / bounds.height
-    min_scale = min(scale_x, scale_y)
-    paths = scale_paths(paths, min_scale, bounds)
-    bounds = get_bounds(paths)
-
-    shift_x = CANVAS_MIDPOINT_X - bounds.mid_x
-    shift_y = CANVAS_MIDPOINT_Y - bounds.mid_y
-
-    return translate_paths(paths, shift_x, shift_y - 2 * CANVAS_MIDPOINT_Y)
+    if AUTO_SHIFT:
+        shift_x = CANVAS_MIDPOINT_X - bounds.mid_x
+        shift_y = CANVAS_MIDPOINT_Y - bounds.mid_y - 2 * CANVAS_MIDPOINT_Y
+    else:
+        # Das Koordinatensystem bei SVG beginnt in der linken obeneren Ecke 
+        # und bei G-Code in der linken unteren Ecke
+        shift_x = 0
+        shift_y = -bounds.height
+    
+    return translate_paths(paths, shift_x, shift_y)
 
 
 def gcode_move(x, y):
@@ -219,12 +227,18 @@ def generate_gcode(fname):
         logging.warning("Using original path since it is shorter than optimized path")
         segments_optimized = segments 
 
+    # Bounding Box nach der Optimierung berechnen
+    min_x = min(min(seg.x) for seg in segments_optimized)
+    min_y = min(min(seg.y) for seg in segments_optimized)
+
     for segment in segments_optimized:
         yield ''
-        yield from gcode_move(segment.x[0], segment.y[0])
+        yield from gcode_move(segment.x[0] , (segment.y[0] ))  # Ursprung auf (0,0) setzen  
         yield from pen_down()
         for idx in range(1, segment.size):
-            yield from gcode_move(segment.x[idx], segment.y[idx])
+            # Pfad fahren mit konfigurierbarem Vorschub, dabei den Ursprung in die linke untere Ecke verschieben
+            yield f'G1 X{segment.x[idx] :.2f} Y{ (segment.y[idx] ):.2f} F{FEED_RATE}'  
+
         yield from pen_up()
 
     yield from postamble()
