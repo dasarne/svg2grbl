@@ -37,10 +37,11 @@ This version of svg2grbl has been adapted to work with **CNC machines** that req
 
 ## Usage
 
-1. Create an **SVG file** with the desired engraving paths.
-2. Convert it into G-code using `svg2gcode.py`.
-3. Load the G-code into your CNC machine.
-4. Start engraving.
+1. Create a **SVG file** with the desired engraving paths.
+2. Configure the config.py file. You can find instructions [here](config.md). 
+3. Convert it to G-code with `svg2gcode.sh`.
+4. Load the G-code into your CNC router.
+5. Start the engraving.
 
 ## License & Contribution
 

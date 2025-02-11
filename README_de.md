@@ -1,5 +1,7 @@
 # SVG2GRBL CNC Fork
 
+(English version can be found [here](README_de.md))
+
 ## Projektbeschreibung
 
 Dieses Projekt ermöglicht es, **SVG-Dateien direkt in G-Code für eine CNC-Fräse umzuwandeln**. Ziel ist es, **Gravuren** auf verschiedenen Oberflächen einfach und präzise aus SVG-Vektorgrafiken zu erstellen.
@@ -38,9 +40,10 @@ Diese Version von svg2grbl wurde angepasst, um mit **CNC-Fräsen** zu arbeiten, 
 ## Nutzung
 
 1. Erstelle eine **SVG-Datei** mit den gewünschten Gravurpfaden.
-2. Konvertiere sie mit `svg2gcode.py` in G-Code.
-3. Lade den G-Code in deine CNC-Fräse.
-4. Starte die Gravur.
+2. Konfiguriere die Datei config.py. Eine Anleitung findest Du [hier](config_de.md). 
+3. Konvertiere sie mit `svg2gcode.sh` in G-Code.
+4. Lade den G-Code in deine CNC-Fräse.
+5. Starte die Gravur.
 
 ## Lizenz & Mitwirkung
 
